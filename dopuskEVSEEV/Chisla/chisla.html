@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+			body {
+			height: 300px;
+		}
+		</style>
+		<style>
+			#parent {
+			text-align: center;
+		}
+		#field {
+			display: inline-block;
+		}		
+		#field td {
+			padding: 20px;
+			border: 1px solid black;
+			cursor: pointer;
+		}
+		.active {
+			background: red;
+		}
+		</style>
+	</head>
+	<body>
+		<div>
+			<table id="field"></table>
+        </div>
+        
+		<form name="clockform"> 												
+            <p>Время: 
+            <input name="clock" size="12" maxlength="12" value="00:00:00.00">
+            <input type="hidden" name="label" size="12" maxlength="40" value="">
+            </p><p id="marker">
+            </p>
+        </form>
+
+		<script>
+            function trim(string) { return string.replace (/\s+/g, " ").replace(/(^\s*)|(\s*)$/g, ''); } //функция удаления пробельных символов с начала и конца строки и возвращает новую строку с добавленными числами
+            let init=0;
+            let startDate;
+            let clocktimer;
+
+            function clearFields() {																//функция обнуления таймера
+            init = 0;
+            clearTimeout(clocktimer);																//обнуляет таймер
+            document.clockform.clock.value='00:00:00.00';											//задаёт значения после обнуления
+            document.clockform.label.value='';
+            }
+            
+            function startTIME() { 																	//функция старта таймера
+            let thisDate = new Date();																//cоздаёт объект Date с текущей датой и временем
+            let t = thisDate.getTime() - startDate.getTime();										//обнуляет время
+            let ms = t%1000; t-=ms; ms=Math.floor(ms/10);											//высчитывает милисекунды
+            t = Math.floor (t/1000);																//округление в меньшую сторону
+            let s = t%60;  t = t - s;																
+            t = Math.floor (t/60);																	
+            let m = t%60; t=t - m;
+            t = Math.floor (t/60);
+            let h = t%60;
+            if (h<10) h='0'+h;																		//если  часы меньше 10, то добавить к 0 переменную h
+            if (m<10) m='0'+m;																		//если  минуты меньше 10, то добавить к 0 переменную m
+            if (s<10) s='0'+s;																		//если  секунды меньше 10, то добавить к 0 переменную s
+            if (ms<10) ms='0'+ms;																	//если  милисекунды меньше 10, то добавить к 0 переменную ms
+            if (init==1) document.clockform.clock.value = h + ':' + m + ':' + s + '.' + ms;			//если init равняется одному, то соеденяеем все числа воедино 
+            clocktimer = setTimeout("startTIME()",10);                                              //вызов функции startTIME() каждые 10 тиков
+            }
+
+            function findTIME() {																	//функция старта и остановки секундомера
+            if (init==0) {																			//если init равняется нулю, то
+            startDate = new Date();																	//запихивает в переменную текущую дату в миллисекундах
+            startTIME();																			//функция старта таймера
+            init=1;
+            } 
+            else {																					//в противном случае 
+            let str = trim(document.clockform.label.value);											//записывает значения в переменную с удалением пробельных символов с начала и конца строки
+            document.getElementById('marker').innerHTML = (str==''?'':str+': ') + 					//в элемент с id marker вставляется время 
+            document.clockform.clock.value + '<br>' + document.getElementById('marker').innerHTML;	
+            clearFields();																			//функция обнуления
+            }
+            }
+
+		function start(size) {																		//функция start, которая принимает значение size
+            findTIME()																				//запускается функция findTIME
+			activate(build(field, prepare(size)), size);       
+		}
+
+		let field = document.querySelector('#field');                                              	//возвращает первый элемент field
+
+		start(2);																					//изначальная матрица 2х2
+				
+		function build(field, arr) {                                                                //функция создания матрицы
+			field.innerHTML = '';																 	
+			let cells = [];			
+			for (let sub of arr) {
+				let tr = document.createElement('tr');												//создание строк
+				for (let num of sub) {
+					let td = document.createElement('td');											//создание столбцов
+					td.innerHTML = num;																//вставляем num
+					tr.appendChild(td);																//добавляется элемент в конец столбца
+					
+					cells.push(td);																	//вставляем столбцы
+				}				
+				field.appendChild(tr);																//добавляется элемент в конец строки 
+			}			
+			return cells;																			//возврат массива
+		}
+		
+		function activate(cells, size) {                 											//в функцию активате передаётся переменные целлс и сайз
+			let counter = 1;																		//счётчик показывает именно ту цифру, на которую надо нажать прямо сейчас
+			for (let cell of cells) {
+				cell.addEventListener('click', function() {											//на каждую целл создаётся события при клике с вызовом функции
+					if (this.innerHTML == counter) {												
+						this.classList.add('active');				
+						if (counter == size * size) {												//условие на победу
+							start(++size);
+							findTIME()
+						}
+						counter++;
+					}
+				});
+			}
+		}
+		
+		function prepare(size) {																	//функция принимает в себя переменную size и возвращает массив arr
+			let arr = [];
+			arr = range(size * size);
+			arr = shuffle(arr);
+			arr = chunk(arr, size);
+			return arr;
+		}
+		
+		function range(count) {																		//функция range, которая принимает значение count
+			let arr = [];																			//создаёт массив arr
+			for (let i = 1; i <= count; i++) {														//цикл, который перебирает от 1 до count
+				arr.push(i);																		//добавляем в массив arr значение i
+			}	
+			return arr;
+		}
+		
+		function shuffle(arr) {																		//функция перемешивает элементы массива, чтобы числа на поле рандомно выводились
+			let result = [];
+			let length = arr.length;
+			for (let i = 0; i < length; i++) {
+				let random = getRandomInt(0, arr.length - 1);										//получение числа от нуля до размера массива -1
+				let elem = arr.splice(random, 1)[0];												//мы полученное число вырезаем, чтобы не было повторяющихся
+				result.push(elem);
+			}
+			return result;
+		}
+
+		function chunk(arr, n) {																	//функция принимает массив с числами и размер матрицы. Изначально размер матрицы равен двум
+			let result = [];																		//создание массива result
+			let count = Math.ceil(arr.length / n);													//задаём новый размер матрицы
+			for (let i = 0; i < count; i++) {														//перебираем все числа для матрицы
+				let elems = arr.splice(0, n);														//разбиваем массив с числами на несколкьо массивов, количество которых равно размеру матрицы
+				result.push(elems);																	//получение двумерного массива с числами для матрицы
+			}
+			return result;
+		}
+		
+		function getRandomInt(min, max) {															
+			return Math.floor(Math.random() * (max - min + 1)) + min;								//получение рандомного числа от 0 до размера массива - 1
+        }
+		</script>
+</body>
+</html>

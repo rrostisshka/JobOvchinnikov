@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+	    #field td 
+        {
+		    width: 100px;
+		    height: 100px;
+		    border: 1px solid black;
+		    text-align: center;
+		    font-weight: bold;
+		}
+	</style>
+</head>
+<body>
+	<table id="field">
+	<tr>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	</table>
+	<script>
+	function start(cells) {												//Функция начинает работу
+	let i = 0;
+	for (let cell of cells) {											//Цикл для перебора всех клеток
+		cell.addEventListener('click', function step() {				//При нажатии на клетку начинает работать функция step
+			if (i % 2 == 0) {											//Если ход по счёту чётный, то...
+				this.innerHTML = 'X';									//Заполняем выбранную клетку 'X'
+			} else {													//В противном случае...
+				this.innerHTML = '0';									//Заполняем выбранную клетку '0'
+			}
+			this.removeEventListener('click', step);					//При повторном нажатии на элемент ничего не будет происходить
+			if (isVictory(cells)) {										//Если присутствует комбинация выигрыша то...
+				alert("Победили "+this.innerHTML); 						//Выводим значёк победителя
+			}
+			else if (i == 8) {											//В противном случае, если все клетки заполнены и нет выигрышной комбинации то...
+				alert('ничья');											//Выводим ничью
+			}			
+			i++;
+		});
+	}
+	}
+	function isVictory(cells) {											//Функция, победы которая начинает работать при вводе значения в поле игры
+	let combs = [														//Все комбинации выигрыша
+		[0, 1, 2],
+		[3, 4, 5],
+		[6, 7, 8],
+		[0, 3, 6],
+		[1, 4, 7],
+		[2, 5, 8],
+		[0, 4, 8],
+		[2, 4, 6],
+	];
+	for (let comb of combs) {											//Перебор всех выигрышных комбинаций
+		if (															//Если хоть одна выигрышная комбинация совпадает с комбинацией в поле игры то...
+			cells[comb[0]].innerHTML == cells[comb[1]].innerHTML &&
+			cells[comb[1]].innerHTML == cells[comb[2]].innerHTML &&
+			cells[comb[0]].innerHTML != ''
+		) {
+			return true;												//Возвращает истину
+		}
+	}
+	return false;														//Возвращает ложь
+	}
+	let cells = document.querySelectorAll('#field td')					//В cells хранятся все столбцы из field
+	start(cells)														//Запуск функции start и передача ей значения cells
+	</script>
+</body>
+</html>

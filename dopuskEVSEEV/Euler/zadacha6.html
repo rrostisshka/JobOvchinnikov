@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        let natural_sum = 0, square_sum = 0;
+
+        for (let i = 1; i <= 100; i++)                  //Перебор чисел от 1 до 100
+        {
+            natural_sum = natural_sum + i;
+            square_sum = square_sum + i ** 2;
+        }
+
+        result = natural_sum ** 2 - square_sum
+        let result2 = result.toLocaleString();
+        document.write( "Разность между суммой квадратов и квадратом суммы первых ста натуральных чисел равна" + " " +result2 );
+    </script>
+</body>
+</html>
